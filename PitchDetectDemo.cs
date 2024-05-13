@@ -21,8 +21,8 @@ public class PitchDetectDemo : MonoBehaviour
     public string note = "detected note";
     public AudioMixer mixer;
     public Text pitchText;
-    
-    
+
+
 
     // Use this for initialization
     void Start()
@@ -33,6 +33,10 @@ public class PitchDetectDemo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        InvokeRepeating("detectPitch", 0, 0.2f);
+    }
+
+    void detectPitch(){
         float freq = PitchDetectorGetFreq(0), deviation = 0.0f;
         frequency = freq.ToString() + " Hz";
 
@@ -44,17 +48,21 @@ public class PitchDetectDemo : MonoBehaviour
         GameObject s1 = GameObject.Find("E4");
 
         Renderer r6 = s6.GetComponent<Renderer>();
-    
+
         Renderer r5 = s5.GetComponent<Renderer>();
-        
+
         Renderer r4 = s4.GetComponent<Renderer>();
-        
+
         Renderer r3 = s3.GetComponent<Renderer>();
-        
+
         Renderer r2 = s2.GetComponent<Renderer>();
-        
+
         Renderer r1 = s1.GetComponent<Renderer>();
 
+        // float flg;
+        // float length = 4.618f; // 0 : -1.237, 100 : 1, 200 : 3.237 
+        
+        float multiplier = 0.50f;
         if (freq > 0.0f)
         {
             float noteval = 57.0f + 12.0f * Mathf.Log10(freq / 440.0f) / Mathf.Log10(2.0f);
@@ -63,34 +71,63 @@ public class PitchDetectDemo : MonoBehaviour
             int noteIndex = (int)f % 12;
             int octave = (int)Mathf.Floor((noteval + 0.5f) / 12.0f);
             note = noteNames[noteIndex] + " " + octave;
+            float range = 0;
 
-            if(78.41 <= freq && freq <= 86.41){
+            if (78.41 <= freq && freq <= 86.41)
+            {
+                // flg = freq*100.0f/82.41f;
+                range = (freq-82.41f)*multiplier;
+
+                sr.transform.position = new Vector3(range, origin, 0);
                 r6.material.color = Color.green;
-            } else if(106.00 <= freq && freq <= 114.00){
+                if (81.41 <= freq && freq <= 83.41)
+                {
+                    r6.material.color = Color.blue;
+                }
+            }
+            else if (106.00 <= freq && freq <= 114.00)
+            {
+                range = (freq-110.0f)*multiplier;
+                
+                sr.transform.position = new Vector3(range, origin, 0);
                 r5.material.color = Color.green;
-            } else if(142.83 <= freq && freq <= 150.83){
+                if (109.00 <= freq && freq <= 111.00)
+                {
+                    r5.material.color = Color.blue;
+                }
+            }
+            else if (142.83 <= freq && freq <= 150.83)
+            {
+                range = (freq-146.83f)*multiplier;
+                
+                sr.transform.position = new Vector3(range, origin, 0);
                 r4.material.color = Color.green;
-            } else if(192.00 <= freq && freq <= 200.00){
+            }
+            else if (192.00 <= freq && freq <= 200.00)
+            {
+                range = (freq-196.0f)*multiplier;
+                
+                sr.transform.position = new Vector3(range, origin, 0);
                 r3.material.color = Color.green;
-            } else if(242.94 <= freq && freq <= 250.94){
+            }
+            else if (242.94 <= freq && freq <= 250.94)
+            {
+                range = (freq-246.94f)*multiplier;
+                
+                sr.transform.position = new Vector3(range, origin, 0);
                 r2.material.color = Color.green;
-            } else if(325.63 <= freq && freq <= 333.63){
+            }
+            else if (325.63 <= freq && freq <= 333.63)
+            {
+                range = (freq-329.63f)*multiplier;
+                
+                sr.transform.position = new Vector3(range, origin, 0);
                 r1.material.color = Color.green;
             }
-
-
         }
         else
         {
-
-            // r6.material.color = Color.white;
-            // r5.material.color = Color.white;
-            // r4.material.color = Color.white;
-            // r3.material.color = Color.white;
-            // r2.material.color = Color.white;
-            // r1.material.color = Color.white;
-            sr.transform.position = new Vector3(0,origin,0);
-
+            sr.transform.position = new Vector3(1, origin, 0);
             note = "unknown";
         }
 
