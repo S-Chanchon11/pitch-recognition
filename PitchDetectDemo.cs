@@ -36,7 +36,8 @@ public class PitchDetectDemo : MonoBehaviour
         InvokeRepeating("detectPitch", 0, 0.2f);
     }
 
-    void detectPitch(){
+    void detectPitch()
+    {
         float freq = PitchDetectorGetFreq(0), deviation = 0.0f;
         frequency = freq.ToString() + " Hz";
 
@@ -61,8 +62,8 @@ public class PitchDetectDemo : MonoBehaviour
 
         // float flg;
         // float length = 4.618f; // 0 : -1.237, 100 : 1, 200 : 3.237 
+
         
-        float multiplier = 0.50f;
         if (freq > 0.0f)
         {
             float noteval = 57.0f + 12.0f * Mathf.Log10(freq / 440.0f) / Mathf.Log10(2.0f);
@@ -71,58 +72,94 @@ public class PitchDetectDemo : MonoBehaviour
             int noteIndex = (int)f % 12;
             int octave = (int)Mathf.Floor((noteval + 0.5f) / 12.0f);
             note = noteNames[noteIndex] + " " + octave;
-            float range = 0;
+            // float range = 0;
 
             if (78.41 <= freq && freq <= 86.41)
             {
                 // flg = freq*100.0f/82.41f;
-                range = (freq-82.41f)*multiplier;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    82.41f,
+                    r6,
+                    sr
+                );
+                // range = (freq - 82.41f) * multiplier;
 
-                sr.transform.position = new Vector3(range, origin, 0);
-                r6.material.color = Color.green;
-                if (81.41 <= freq && freq <= 83.41)
-                {
-                    r6.material.color = Color.blue;
-                }
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r6.material.color = Color.green;
+                // if (81.41 <= freq && freq <= 83.41)
+                // {
+                //     r6.material.color = Color.blue;
+                // }
             }
             else if (106.00 <= freq && freq <= 114.00)
             {
-                range = (freq-110.0f)*multiplier;
-                
-                sr.transform.position = new Vector3(range, origin, 0);
-                r5.material.color = Color.green;
-                if (109.00 <= freq && freq <= 111.00)
-                {
-                    r5.material.color = Color.blue;
-                }
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    110.0f,
+                    r5,
+                    sr
+                );
+                // range = (freq - 110.0f) * multiplier;
+
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r5.material.color = Color.green;
+                // if (109.00 <= freq && freq <= 111.00)
+                // {
+                //     r5.material.color = Color.blue;
+                // }
             }
             else if (142.83 <= freq && freq <= 150.83)
             {
-                range = (freq-146.83f)*multiplier;
-                
-                sr.transform.position = new Vector3(range, origin, 0);
-                r4.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    146.83f,
+                    r4,
+                    sr
+                );
+                // range = (freq - 146.83f) * multiplier;
+
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r4.material.color = Color.green;
             }
             else if (192.00 <= freq && freq <= 200.00)
             {
-                range = (freq-196.0f)*multiplier;
-                
-                sr.transform.position = new Vector3(range, origin, 0);
-                r3.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    196.0f,
+                    r3,
+                    sr
+                );
+                // range = (freq - 196.0f) * multiplier;
+
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r3.material.color = Color.green;
             }
             else if (242.94 <= freq && freq <= 250.94)
             {
-                range = (freq-246.94f)*multiplier;
-                
-                sr.transform.position = new Vector3(range, origin, 0);
-                r2.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    246.94f,
+                    r2,
+                    sr
+                );
+                // range = (freq - 246.94f) * multiplier;
+
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r2.material.color = Color.green;
             }
             else if (325.63 <= freq && freq <= 333.63)
             {
-                range = (freq-329.63f)*multiplier;
-                
-                sr.transform.position = new Vector3(range, origin, 0);
-                r1.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    329.63f,
+                    r1,
+                    sr
+                );
+                // range = (freq - 329.63f) * multiplier;
+
+                // sr.transform.position = new Vector3(range, origin, 0);
+                // r1.material.color = Color.green;
             }
         }
         else
@@ -133,6 +170,27 @@ public class PitchDetectDemo : MonoBehaviour
 
         if (pitchText != null)
             pitchText.text = "Detected frequency: " + frequency + "\nDetected note: " + note + " (deviation: " + deviation + " cents)";
+    }
+
+    private void calculateDiffAndMoveIndicator(
+        float freq,
+        float pitch_value,
+        Renderer rd,
+        SpriteRenderer sr
+    )
+    {
+        // if pitch reached first or second quarter convert it into blue color
+        float range;
+        float multiplier = 0.50f;
+        float origin = 1.5014f;
+
+        range = (freq - pitch_value) * multiplier;
+        sr.transform.position = new Vector3(range, origin, 0);
+        rd.material.color = Color.green;
+        if (pitch_value-1.0f <= freq && freq <= pitch_value+1.0f)
+        {
+            rd.material.color = Color.blue;
+        }
     }
 
 }
