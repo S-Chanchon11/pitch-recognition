@@ -33,7 +33,7 @@ public class PitchDetectDemo : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        InvokeRepeating("detectPitch", 0, 0.2f);
+        InvokeRepeating("detectPitch", 0, 0.3f);
     }
 
     void detectPitch()
@@ -62,10 +62,11 @@ public class PitchDetectDemo : MonoBehaviour
 
         // float flg;
         // float length = 4.618f; // 0 : -1.237, 100 : 1, 200 : 3.237 
-
+        
         
         if (freq > 0.0f)
         {
+            sr.enabled = false;
             float noteval = 57.0f + 12.0f * Mathf.Log10(freq / 440.0f) / Mathf.Log10(2.0f);
             float f = Mathf.Floor(noteval + 0.5f);
             deviation = Mathf.Floor((noteval - f) * 100.0f);
@@ -164,7 +165,8 @@ public class PitchDetectDemo : MonoBehaviour
         }
         else
         {
-            sr.transform.position = new Vector3(1, origin, 0);
+            // sr.transform.position = new Vector3(1, origin, 0);
+            sr.enabled = false;
             note = "unknown";
         }
 
