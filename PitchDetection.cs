@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PitchDetection : MonoBehaviour
 {
@@ -10,6 +11,11 @@ public class PitchDetection : MonoBehaviour
     public int duration = 8;
     private float origin = 1.5014f;
     public static float[] samples = new float[128];
+    string[] noteNames = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+
+    public Text pitchText;
+    public string frequency = "detected frequency";
+    public string note = "detected note";
     void Start()
     {
         sr = GetComponent<SpriteRenderer>();
@@ -33,8 +39,11 @@ public class PitchDetection : MonoBehaviour
     {
         // estimator = GetComponent<AudioPitchEstimator>();
         // Estimates fundamental frequency from AudioSource output.
-        float frequency = AudioPitchEstimator.instance.Estimate(audioSource);
+        // float frequency = AudioPitchEstimator.instance.Estimate(audioSource);
+        float freq = AudioPitchEstimator.instance.Estimate(audioSource), deviation = 0.0f;
+        frequency = freq.ToString() + " Hz";
         
+
         GameObject s6 = GameObject.Find("E2");
         Renderer r6 = s6.GetComponent<Renderer>();
         GameObject s5 = GameObject.Find("A2");
@@ -48,7 +57,7 @@ public class PitchDetection : MonoBehaviour
         GameObject s1 = GameObject.Find("E4");
         Renderer r1 = s1.GetComponent<Renderer>();
 
-        if (float.IsNaN(frequency))
+        if (float.IsNaN(freq))
         {
             // Algorithm didn't detect fundamental frequency (e.g. silence).
             r6.material.color = Color.white;
@@ -57,63 +66,121 @@ public class PitchDetection : MonoBehaviour
             r3.material.color = Color.white;
             r2.material.color = Color.white;
             r1.material.color = Color.white;
-            sr.transform.position = new Vector3(0,origin,0);
+            // sr.transform.position = new Vector3(0,origin,0);
+            sr.enabled = false;
+            note = "unknown";
+            
         }
         else
         {
             float range;
-            if (72.41 <= frequency && frequency <= 92.41) // 6 (E)	82.41 Hz	E2
+            sr.enabled = true;
+            float noteval = 57.0f + 12.0f * Mathf.Log10(freq / 440.0f) / Mathf.Log10(2.0f);
+            float f = Mathf.Floor(noteval + 0.5f);
+            deviation = Mathf.Floor((noteval - f) * 100.0f);
+            int noteIndex = (int)f % 12;
+            int octave = (int)Mathf.Floor((noteval + 0.5f) / 12.0f);
+            note = noteNames[noteIndex] + " " + octave;
+
+            if (78.41 <= freq && freq <= 86.41)
             {
-                range = 82.41f - frequency;
-                sr.transform.position = new Vector3(range,origin,0) * Time.deltaTime; 
-                r6.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    82.41f,
+                    r6,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
+
             }
-            else if (100.0 <= frequency && frequency <= 120.0) // 5 (A)	110.00 Hz	A2
+            else if (106.00 <= freq && freq <= 114.00)
             {
-                range = 110.00f - frequency;
-                sr.transform.position = new Vector3(range,origin,0) * Time.deltaTime;
-                r5.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    110.0f,
+                    r5,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
             }
-            else if (136.83 <= frequency && frequency <= 156.83) // 4 (D)	146.83 Hz	D3
+            else if (142.83 <= freq && freq <= 150.83)
             {
-                range = 146.83f - frequency;
-                sr.transform.position = new Vector3(range,origin,0)* Time.deltaTime;
-                r4.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    146.83f,
+                    r4,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
             }
-            else if (186.00 <= frequency && frequency <= 206.00) // 3 (G)	196.00 Hz	G3
+            else if (192.00 <= freq && freq <= 200.00)
             {
-                range = 196.00f - frequency;
-                sr.transform.position = new Vector3(range,origin,0)* Time.deltaTime;
-                r3.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    196.0f,
+                    r3,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
             }
-            else if (236.94 <= frequency && frequency <= 256.94) // 2 (B)	246.94 Hz	B3
+            else if (242.94 <= freq && freq <= 250.94)
             {
-                range = 246.94f - frequency;
-                sr.transform.position = new Vector3(range,origin,0)* Time.deltaTime;
-                r2.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    246.94f,
+                    r2,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
             }
-            else if (319.63 <= frequency && frequency <= 339.63) // 1 (E)	329.63 Hz	E4
+            else if (325.63 <= freq && freq <= 333.63)
             {
-                range = 329.63f - frequency;
-                sr.transform.position = new Vector3(range,origin,0)* Time.deltaTime;
-                r1.material.color = Color.green;
+                calculateDiffAndMoveIndicator(
+                    freq,
+                    329.63f,
+                    r1,
+                    sr
+                );
                 coroutine();
-                Debug.Log(frequency);
+
             }
             // Algorithm detected fundamental frequency.
             // The frequency is stored in the variable `frequency` (in Hz).
+            if (pitchText != null)
+                pitchText.text = "Detected frequency: " + frequency + "\nDetected note: " + "note";
+        }
+        
+    }
+    void Update()
+    {
+        // It is NOT recommended to run the estimation every frame.
+        // This will take a high computational load.
+        // EstimatePitch();
+        // InvokeRepeating("EstimatePitch", 0, 0.1f);
+    }
+
+    private void calculateDiffAndMoveIndicator(
+        float freq,
+        float pitch_value,
+        Renderer rd,
+        SpriteRenderer sr
+    )
+    {
+        // if pitch reached first or second quarter convert it into blue color
+        float range;
+        float multiplier = 0.50f;
+        float origin = 1.5014f;
+
+        range = (freq - pitch_value) * multiplier;
+        sr.transform.position = new Vector3(range, origin, 0);
+        // Color active = new Color(219,241,225,1);
+        rd.material.color = new Color(0.86f, 0.95f, 0.88f);
+        if (pitch_value - 1.0f <= freq && freq <= pitch_value + 1.0f)
+        {
+            rd.material.color = Color.green;
         }
     }
+
 
     void getOutputData()
     {
@@ -133,12 +200,6 @@ public class PitchDetection : MonoBehaviour
         yield return new WaitForSeconds(2);
     }
 
-    void Update()
-    {
-        // It is NOT recommended to run the estimation every frame.
-        // This will take a high computational load.
-        EstimatePitch();
-    }
 
 
 }
@@ -156,7 +217,7 @@ public class PitchDetection : MonoBehaviour
 //     {
 //         audioBuffer = new float[bufferSize];
 //         spectrum = new float[bufferSize / 2];
-        
+
 //         StartMicrophone();
 //     }
 
@@ -168,16 +229,16 @@ public class PitchDetection : MonoBehaviour
 //             // Get audio data from the microphone into the audio buffer
 //             Microphone.GetPosition(microphoneName, out int position);
 //             AudioListener.GetOutputData(audioBuffer, 0);
-            
+
 //             // Calculate spectrum using FFT
 //             FFT.Calculate(audioBuffer, spectrum, false);
-            
+
 //             // Find peak frequency in the spectrum
 //             pitch = FindPeakFrequency(spectrum, sampleRate);
-            
+
 //             // Check the detected pitch against standard guitar tuning frequencies
 //             float closestFrequency = FindClosestFrequency(pitch);
-            
+
 //             // Output the detected pitch
 //             Debug.Log("Detected pitch: " + closestFrequency + " Hz");
 //         }
@@ -187,7 +248,7 @@ public class PitchDetection : MonoBehaviour
 //     {
 //         if (microphoneName == null)
 //             microphoneName = Microphone.devices[0]; // Use default microphone if not specified
-        
+
 //         Microphone.Start(microphoneName, true, 1, sampleRate);
 //     }
 

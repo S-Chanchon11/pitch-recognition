@@ -23,7 +23,6 @@ public class PitchDetectDemo : MonoBehaviour
     public Text pitchText;
 
 
-
     // Use this for initialization
     void Start()
     {
@@ -84,14 +83,7 @@ public class PitchDetectDemo : MonoBehaviour
                     r6,
                     sr
                 );
-                // range = (freq - 82.41f) * multiplier;
 
-                // sr.transform.position = new Vector3(range, origin, 0);
-                // r6.material.color = Color.green;
-                // if (81.41 <= freq && freq <= 83.41)
-                // {
-                //     r6.material.color = Color.blue;
-                // }
             }
             else if (106.00 <= freq && freq <= 114.00)
             {
