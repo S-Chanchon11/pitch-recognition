@@ -176,7 +176,7 @@ public class PitchDetectDemo : MonoBehaviour
         // if pitch reached first or second quarter convert it into blue color
         float range;
         float multiplier = 0.50f;
-        float origin = 1.5014f;
+        float origin = 1.126f;
 
         range = (freq - pitch_value) * multiplier;
         sr.transform.position = new Vector3(range, origin, 0);
